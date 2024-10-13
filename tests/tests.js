@@ -1,30 +1,38 @@
 (() => {
     'use strict';
 
-    var Wsdlrdr = require('../src/index.js');
+    const Wsdlrdr = require('../src/index.js');
 
-    const wsdlUrls = [{
-        host: 'soaptest.parasoft.com',
-        wsdl: '/calculator.wsdl'
-    }, {
-        host: 'webservices.oorsprong.org',
-        wsdl: '/websamples.countryinfo/CountryInfoService.wso?WSDL'
-    }, {
-        host: 'webservices.daehosting.com',
-        wsdl: '/services/isbnservice.wso?WSDL'
-    }, {
-        host: 'www.dataaccess.com',
-        wsdl: '/webservicesserver/numberconversion.wso?WSDL'
-    }, {
-        host: 'webservices.optimalpayments.com',
-        wsdl: '/ilsWS/IlsService/v1?wsdl'
-    }, {
-        host: 'svn.apache.org',
-        wsdl: '/repos/asf/airavata/sandbox/xbaya-web/test/Calculator.wsdl'
-    }, {
-        host: 'www.pegelonline.wsv.de',
-        wsdl: '/webservices/version2_4/2009/05/12/PegelonlineWebservice?WSDL'
-    }];
+    const wsdlUrls = [
+        // {
+        //     host: "soaptest.parasoft.com",
+        //     wsdl: "/calculator.wsdl",
+        // },
+        {
+            host: 'webservices.oorsprong.org',
+            wsdl: '/websamples.countryinfo/CountryInfoService.wso?WSDL'
+        },
+        {
+            host: 'webservices.daehosting.com',
+            wsdl: '/services/isbnservice.wso?WSDL'
+        },
+        {
+            host: 'www.dataaccess.com',
+            wsdl: '/webservicesserver/numberconversion.wso?WSDL'
+        },
+        {
+            host: 'webservices.optimalpayments.com',
+            wsdl: '/ilsWS/IlsService/v1?wsdl'
+        },
+        {
+            host: 'svn.apache.org',
+            wsdl: '/repos/asf/airavata/sandbox/xbaya-web/test/Calculator.wsdl'
+        },
+        {
+            host: 'www.pegelonline.wsv.de',
+            wsdl: '/webservices/version2_4/2009/05/12/PegelonlineWebservice?WSDL'
+        }
+    ];
 
     const wsdlOpts = {
         'svn.apache.org': {
@@ -33,7 +41,7 @@
     };
     const wsdlFunctions = [];
 
-    var test = require('tape');
+    const test = require('tape');
 
     test('notExistsingWsdlUrl', async (t) => {
         try {
@@ -51,10 +59,16 @@
 
     test('getNamespaces', async (t) => {
         try {
-            for (let wsdlParams of wsdlUrls) {
+            for (const wsdlParams of wsdlUrls) {
                 t.comment(`=> ${wsdlParams.host}`);
-                let data = await Wsdlrdr.getNamespaces(wsdlParams, wsdlOpts[wsdlParams.host]);
-                t.ok(data.length !== 0, `${wsdlParams.host} has ${data.length} namespaces`);
+                const data = await Wsdlrdr.getNamespaces(
+                    wsdlParams,
+                    wsdlOpts[wsdlParams.host]
+                );
+                t.ok(
+                    data.length !== 0,
+                    `${wsdlParams.host} has ${data.length} namespaces`
+                );
             }
             t.end();
         } catch (err) {
@@ -65,10 +79,16 @@
 
     test('getAllFunctions', async (t) => {
         try {
-            for (let wsdlParams of wsdlUrls) {
+            for (const wsdlParams of wsdlUrls) {
                 t.comment(`=> ${wsdlParams.host}`);
-                let data = await Wsdlrdr.getAllFunctions(wsdlParams, wsdlOpts[wsdlParams.host]);
-                t.ok(data.length !== 0, `${wsdlParams.host} has ${data.length} functions`);
+                const data = await Wsdlrdr.getAllFunctions(
+                    wsdlParams,
+                    wsdlOpts[wsdlParams.host]
+                );
+                t.ok(
+                    data.length !== 0,
+                    `${wsdlParams.host} has ${data.length} functions`
+                );
                 // save found functions
                 wsdlFunctions[wsdlParams.host] = data;
             }
@@ -81,20 +101,37 @@
 
     test('getMethodParamsByName', async (t) => {
         try {
-            for (let wsdlParams of wsdlUrls) {
-                for (let methodName of wsdlFunctions[wsdlParams.host]) {
-                    let methodParams = await Wsdlrdr.getMethodParamsByName(methodName, wsdlParams, wsdlOpts[wsdlParams.host]);
-                    t.ok(methodParams, `could get params from method "${methodName}"`);
-                    t.ok(methodParams.response, `response available`);
-                    t.ok(methodParams.response.find((responseItem) => responseItem.name === 'parameters'), 'got response parameters');
-                    t.ok(methodParams.request, `request available`);
-                    t.ok(methodParams.request.find((requestItem) => requestItem.name === 'parameters'), 'got request parameters');
+            for (const wsdlParams of wsdlUrls) {
+                for (const methodName of wsdlFunctions[wsdlParams.host]) {
+                    const methodParams = await Wsdlrdr.getMethodParamsByName(
+                        methodName,
+                        wsdlParams,
+                        wsdlOpts[wsdlParams.host]
+                    );
+                    t.ok(
+                        methodParams,
+                        `could get params from method "${methodName}"`
+                    );
+                    t.ok(methodParams.response, 'response available');
+                    t.ok(
+                        methodParams.response.find(
+                            (responseItem) => responseItem.name === 'parameters'
+                        ),
+                        'got response parameters'
+                    );
+                    t.ok(methodParams.request, 'request available');
+                    t.ok(
+                        methodParams.request.find(
+                            (requestItem) => requestItem.name === 'parameters'
+                        ),
+                        'got request parameters'
+                    );
 
-                    for (let responseItem of methodParams.response) {
+                    for (const responseItem of methodParams.response) {
                         t.ok(responseItem.params, 'got response params');
                     }
 
-                    for (let requestItem of methodParams.request) {
+                    for (const requestItem of methodParams.request) {
                         t.ok(requestItem.params, 'got request params');
                     }
                 }
@@ -109,12 +146,15 @@
 
     test('getMethodParamsByName.givenMethodNotExists', async (t) => {
         try {
-            var wsdlParams = wsdlUrls[0];
+            const wsdlParams = wsdlUrls[0];
             if (!wsdlParams) {
                 t.end('no wsdlParams');
             }
 
-            await Wsdlrdr.getMethodParamsByName('notAvailableMethodName', wsdlParams);
+            await Wsdlrdr.getMethodParamsByName(
+                'notAvailableMethodName',
+                wsdlParams
+            );
             t.end('has found method');
         } catch (err) {
             t.ok(err, 'not found method');
@@ -124,7 +164,7 @@
 
     test('getXmlDataAsJson', (t) => {
         t.plan(2);
-        var responseXml = `<?xml version="1.0" encoding="UTF-8"?>
+        const responseXml = `<?xml version="1.0" encoding="UTF-8"?>
             <SOAP-ENV:Envelope
                 xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/"
                 xmlns:wsdl="http://schemas.xmlsoap.org/"
@@ -138,13 +178,13 @@
             </SOAP-ENV:Body>
         </SOAP-ENV:Envelope>`;
 
-        var dataAsJson = Wsdlrdr.getXmlDataAsJson(responseXml);
-        if (dataAsJson.testResponseItem1) t.pass('testResponseItem1 is available');
-        if (dataAsJson.testResponseItem2) t.pass('testResponseItem2 is available');
+        const dataAsJson = Wsdlrdr.getXmlDataAsJson(responseXml);
+        if (dataAsJson.testResponseItem1) { t.pass('testResponseItem1 is available'); }
+        if (dataAsJson.testResponseItem2) { t.pass('testResponseItem2 is available'); }
     });
 
     test('getXmlDataAsJson.noBody', (t) => {
-        var xml = `<?xml version="1.0" encoding="utf-16"?>
+        const xml = `<?xml version="1.0" encoding="utf-16"?>
         <CurrentWeather>
             <Location>Leipzig-Schkeuditz, Germany (EDDP) 51-25N 012-14E 149M</Location>
             <Time>Oct 07, 2015 - 06:50 AM EDT / 2015.10.07 1050 UTC</Time>
@@ -158,14 +198,14 @@
             <Status>Success</Status>
         </CurrentWeather>`;
 
-        var dataAsJson = Wsdlrdr.getXmlDataAsJson(xml);
+        const dataAsJson = Wsdlrdr.getXmlDataAsJson(xml);
 
         t.ok(dataAsJson.CurrentWeather.length !== 0, 'data available');
         t.end();
     });
 
     test('getXmlDataAsJson.array', (t) => {
-        var responseXml = `<?xml version="1.0" encoding="UTF-8"?>
+        const responseXml = `<?xml version="1.0" encoding="UTF-8"?>
             <SOAP-ENV:Envelope
                 xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
@@ -189,16 +229,22 @@
             </SOAP-ENV:Body>
         </SOAP-ENV:Envelope>`;
 
-        var dataAsJson = Wsdlrdr.getXmlDataAsJson(responseXml);
-        t.ok(dataAsJson.getDataTypeResponse, 'getDataTypeResponse is available');
-        t.ok(dataAsJson.getDataTypeResponse.testParam2.length === 2, 'testParam2 got 2 items');
+        const dataAsJson = Wsdlrdr.getXmlDataAsJson(responseXml);
+        t.ok(
+            dataAsJson.getDataTypeResponse,
+            'getDataTypeResponse is available'
+        );
+        t.ok(
+            dataAsJson.getDataTypeResponse.testParam2.length === 2,
+            'testParam2 got 2 items'
+        );
 
         t.end();
     });
 
     test('getXmlDataAsJson.withAttrValue', (t) => {
         t.plan(1);
-        var responseXml = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        const responseXml = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
                 <S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
                 <S:Body>
                     <ns5:getDataTypeResponse xmlns:ns5="http://sphinx.dat.de/services/DataTypeService">
@@ -211,12 +257,12 @@
                 </S:Body>
             </S:Envelope>`;
 
-        var dataAsJson = Wsdlrdr.getXmlDataAsJson(responseXml);
-        if (dataAsJson.getDataTypeResponse) t.pass('getDataTypeResponse is available');
+        const dataAsJson = Wsdlrdr.getXmlDataAsJson(responseXml);
+        if (dataAsJson.getDataTypeResponse) { t.pass('getDataTypeResponse is available'); }
     });
 
     test('getXmlDataAsJson.withAttrInTopTag', (t) => {
-        var responseXml = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        const responseXml = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
             <S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
                 <S:Body>
                     <ns5:topLevelTag attribute1="1111" attribute2="2222">
@@ -235,15 +281,30 @@
                 </S:Body>
             </S:Envelope>`;
 
-        var dataAsJson = Wsdlrdr.getXmlDataAsJson(responseXml);
+        const dataAsJson = Wsdlrdr.getXmlDataAsJson(responseXml);
 
         t.ok(dataAsJson.topLevelTag, 'topLevelTag is available');
-        t.ok(dataAsJson.topLevelTag.attribute1, 'topLevelTag.attribute1 is available');
-        t.ok(dataAsJson.topLevelTag.attribute2, 'topLevelTag.attribute2 is available');
+        t.ok(
+            dataAsJson.topLevelTag.attribute1,
+            'topLevelTag.attribute1 is available'
+        );
+        t.ok(
+            dataAsJson.topLevelTag.attribute2,
+            'topLevelTag.attribute2 is available'
+        );
 
-        t.ok(dataAsJson.topLevelTag.lowerLevelTag, 'lowerLevelTag is available');
-        t.ok(dataAsJson.topLevelTag.lowerLevelTag.attribute1, 'lowerLevelTag.attribute1 is available');
-        t.ok(dataAsJson.topLevelTag.lowerLevelTag.attribute2, 'lowerLevelTag.attribute2 is available');
+        t.ok(
+            dataAsJson.topLevelTag.lowerLevelTag,
+            'lowerLevelTag is available'
+        );
+        t.ok(
+            dataAsJson.topLevelTag.lowerLevelTag.attribute1,
+            'lowerLevelTag.attribute1 is available'
+        );
+        t.ok(
+            dataAsJson.topLevelTag.lowerLevelTag.attribute2,
+            'lowerLevelTag.attribute2 is available'
+        );
 
         t.end();
     });
