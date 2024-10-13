@@ -8,7 +8,9 @@
     const fs = require('fs');
     const path = require('path');
 
-    const cachePath = path.resolve(__dirname, '..', 'cache');
+    // const cachePath = path.resolve(__dirname, '..', 'cache');
+    const os = require('os');
+    const cachePath = os.tmpdir();
 
     function getProtocol (opts = {}) {
         if (!opts.secure) {
